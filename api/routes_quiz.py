@@ -13,6 +13,9 @@ EXCEL_PATH = os.path.join(BASE_DIR, "assets", "General_Standard_Hanzi.xlsx")
 print("Loading Pinyin dictionary into memory...")
 try:
     df = pandas.read_excel(EXCEL_PATH)
+
+    df = df.dropna(subset=['Pinyin'])
+
     CHAR_TO_PINYIN = df.set_index('Character')['Pinyin'].to_dict()
 except Exception as e:
     print(f"Error loading Excel file: {e}")
@@ -30,7 +33,7 @@ def load_confusion_map(hsk_level: str):
     file_path = os.path.join(base_dir, "assets", "confusion_maps", filename)
 
     if not os.path.exists(file_path):
-        raise HTTPException(status_code=404, detail=f"Data for character set not found.")
+        raise HTTPException(status_code=400, detail=f"Data for character set not found.")
 
     with open(file_path, 'r', encoding='utf-8') as f:
         return json.load(f)
@@ -41,18 +44,17 @@ def generate_quiz(
         count: int = Query(5, description="Number of questions to generate."),
         difficulty: str = Query("medium", description="Difficulty: easy, medium, hard"),
 ):
-
     if hsk_level.lower() != "all":
         if not hsk_level.isdigit():
-            raise HTTPException(status_code=404, detail=f"HSK level {hsk_level} must be number.")
+            raise HTTPException(status_code=400, detail=f"HSK level {hsk_level} must be number.")
         if int(hsk_level) < 1 or int(hsk_level) > 6:
-            raise HTTPException(status_code=404, detail=f"HSK level {hsk_level} must be between 1 and 6.")
+            raise HTTPException(status_code=400, detail=f"HSK level {hsk_level} must be between 1 and 6.")
 
     if count < 1:
-        raise HTTPException(status_code=404, detail=f"Number of questions to generate must be greater than 0.")
+        raise HTTPException(status_code=400, detail=f"Number of questions to generate must be greater than 0.")
 
     if difficulty.lower() not in ["easy", "medium", "hard"]:
-        raise HTTPException(status_code=404, detail=f"Difficulty {difficulty} is not supported.")
+        raise HTTPException(status_code=400, detail=f"Difficulty {difficulty} is not supported.")
 
     confusion_map = load_confusion_map(hsk_level)
 
@@ -76,6 +78,8 @@ def generate_quiz(
         }]
 
         seen_pinyins = {target_pinyin}
+
+        difficulty = difficulty.lower()
 
         if difficulty == "hard":
             start_idx = 0

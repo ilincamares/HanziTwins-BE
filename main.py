@@ -23,7 +23,7 @@ app.add_middleware(
 
 @app.get("/")
 def read_root():
-    return {"message": "Welcome to the HanziTwins Engine Room!"}
+    return {"message": "Server is running"}
 
 app.include_router(quiz_router, prefix="/api/quiz", tags=["Quiz Generation"])
 
