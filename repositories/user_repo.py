@@ -1,3 +1,5 @@
+from typing import Any
+
 from sqlalchemy.orm import Session
 
 from database.models import User
@@ -41,3 +43,10 @@ class UserRepository:
             return existing_user
 
         return self.create(username)
+
+    def get_all(self) -> list[type[User]]:
+        return (
+            self.db.query(User)
+            .order_by(User.username.asc())
+            .all()
+        )

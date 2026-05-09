@@ -4,7 +4,7 @@ from contextlib import asynccontextmanager
 import torch
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from routes import routes_quiz, routes_user, routes_progress
+from routes import routes_quiz, routes_user, routes_progress, routes_explorer
 from database.connection import init_db
 
 @asynccontextmanager
@@ -31,6 +31,7 @@ app.add_middleware(
 app.include_router(routes_quiz.router, prefix="/api/quiz", tags=["quiz"])
 app.include_router(routes_user.router, prefix="/api/users", tags=["users"])
 app.include_router(routes_progress.router, prefix="/api/progress", tags=["progress"])
+app.include_router(routes_explorer.router, prefix="/api/explorer", tags=["explorer"])
 
 @app.get("/")
 def read_root():

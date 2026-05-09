@@ -45,3 +45,22 @@ def get_user(
         "username": user.username,
         "created_at": user.created_at.isoformat(),
     }
+
+
+@router.get("/")
+def get_users(
+    db: Session = Depends(get_db),
+):
+    user_repository = UserRepository(db)
+    users = user_repository.get_all()
+
+    return {
+        "users": [
+            {
+                "id": user.id,
+                "username": user.username,
+                "created_at": user.created_at.isoformat(),
+            }
+            for user in users
+        ]
+    }
