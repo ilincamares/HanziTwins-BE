@@ -1,0 +1,3 @@
+from repositories.user_repo import UserRepository
+from repositories.quiz_attempt_repo import QuizAttemptRepository
+from repositories.progress_repo import ProgressRepository

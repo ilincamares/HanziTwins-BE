@@ -1,11 +1,18 @@
 import os
+from contextlib import asynccontextmanager
 
 import torch
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from api.routes_quiz import router as quiz_router
+from routes import routes_quiz, routes_user, routes_progress
+from database.connection import init_db
 
-app = FastAPI(title="HanziTwins API")
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    init_db()
+    yield
+
+app = FastAPI(title="HanziTwins API", lifespan=lifespan)
 
 app.add_middleware(
     CORSMiddleware,
@@ -21,9 +28,12 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+app.include_router(routes_quiz.router, prefix="/api/quiz", tags=["quiz"])
+app.include_router(routes_user.router, prefix="/api/users", tags=["users"])
+app.include_router(routes_progress.router, prefix="/api/progress", tags=["progress"])
+
 @app.get("/")
 def read_root():
     return {"message": "Server is running"}
 
-app.include_router(quiz_router, prefix="/api/quiz", tags=["Quiz Generation"])
 

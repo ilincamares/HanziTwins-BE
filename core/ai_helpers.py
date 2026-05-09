@@ -1,6 +1,6 @@
 import torch
 
-from backend.core.siamese_network import SiameseNetwork
+from core.siamese_network import SiameseNetwork
 
 
 def load_model():
