@@ -15,12 +15,6 @@ from routes.routes_quiz import load_confusion_map, CHAR_TO_PINYIN
 router = APIRouter()
 
 def get_safe_pinyin(character: str) -> str:
-    """
-    Returns a JSON-safe pinyin value.
-
-    If the pinyin is missing or invalid, the character itself is used
-    as a fallback value.
-    """
     value = CHAR_TO_PINYIN.get(character)
 
     if value is None:
@@ -38,9 +32,6 @@ def get_safe_pinyin(character: str) -> str:
 
 
 def get_safe_similarity(score) -> float:
-    """
-    Returns a JSON-safe similarity value.
-    """
     try:
         score = float(score)
     except (TypeError, ValueError):
@@ -53,10 +44,6 @@ def get_safe_similarity(score) -> float:
 
 
 def get_difficulty_start_index(difficulty: str) -> int:
-    """
-    Determines which part of the nearest-neighbor list should be used
-    based on the selected difficulty.
-    """
     difficulty = difficulty.lower()
 
     if difficulty == "hard":
@@ -69,11 +56,6 @@ def get_difficulty_start_index(difficulty: str) -> int:
 
 
 def build_review_question(target: str, confusion_map: dict, difficulty: str) -> dict | None:
-    """
-    Builds one quiz question for a missed character.
-
-    Returns None if the target character cannot be found in the confusion map.
-    """
     if target not in confusion_map:
         return None
 

@@ -85,7 +85,7 @@ def generate_quiz(
             start_idx = 0
         elif difficulty == "medium":
             start_idx = 2
-        else:  # easy
+        else:
             start_idx = 4
 
         distractors_found = 0
