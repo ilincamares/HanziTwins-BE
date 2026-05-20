@@ -11,12 +11,10 @@ router = APIRouter()
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
-PROJECTION_PATH = os.path.join(
-    BASE_DIR,
-    "assets",
-    "embeddings",
-    "embedding_projection.json"
-)
+PROJECTION_FILES = {
+    "umap": os.path.join(BASE_DIR, "assets", "embeddings", "embedding_projection_umap.json"),
+    "tsne": os.path.join(BASE_DIR, "assets", "embeddings", "embedding_projection_tsne.json"),
+}
 
 CONFUSION_MAP_PATH = os.path.join(
     BASE_DIR,
@@ -41,9 +39,9 @@ def normalize_hsk_level(value):
     if value is None:
         return None
 
-    value = str(value).strip()
+    value = str(value).lower().strip()
 
-    if value.lower() == "nan" or value == "":
+    if value == "nan" or value == "":
         return None
 
     return value
@@ -77,16 +75,22 @@ def get_safe_similarity(score) -> float:
 
     return score
 
-
 @router.get("/map")
 def get_embedding_map(
-    hsk_level: str = Query("all", description="HSK level or 'all'"),
+    hsk_level: str = Query("all"),
+    method: str = Query("umap"),
 ):
-    projection_data = load_json_file(PROJECTION_PATH)
+    method = method.lower()
 
-    normalized_hsk = hsk_level.lower().strip()
+    if method not in PROJECTION_FILES:
+        raise HTTPException(
+            status_code=400,
+            detail="Projection method must be either 'umap' or 'tsne'."
+        )
 
-    if normalized_hsk != "all":
+    projection_data = load_json_file(PROJECTION_FILES[method])
+
+    if hsk_level.lower() != "all":
         projection_data = [
             point for point in projection_data
             if normalize_hsk_level(point.get("hsk_level")) == hsk_level
@@ -95,11 +99,11 @@ def get_embedding_map(
     return {
         "metadata": {
             "hsk_level": hsk_level,
+            "method": method,
             "count": len(projection_data),
         },
         "points": projection_data,
     }
-
 
 @router.get("/{character}/neighbors")
 def get_character_neighbors(
