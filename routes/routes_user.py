@@ -1,10 +1,10 @@
-from fastapi import APIRouter, Depends, HTTPException
-from sqlalchemy.orm import Session
+import traceback
 
-from database.connection import get_db
-from repositories import UserRepository
+from fastapi import APIRouter, HTTPException, Depends
+
 from dtos.user_dtos import UserCreateRequest
-
+from services.dependencies import get_user_service
+from services.user_service import UserService
 
 router = APIRouter()
 
@@ -12,55 +12,37 @@ router = APIRouter()
 @router.post("/")
 def create_or_load_user(
     request: UserCreateRequest,
-    db: Session = Depends(get_db),
+    user_service: UserService = Depends(get_user_service),
 ):
-    username = request.username.strip()
-
-    if not username:
-        raise HTTPException(status_code=400, detail="Username cannot be empty.")
-
-    user_repository = UserRepository(db)
-    user = user_repository.get_or_create(username)
-
-    return {
-        "id": user.id,
-        "username": user.username,
-        "created_at": user.created_at.isoformat(),
-    }
+    try:
+        return user_service.create_or_load_user(request)
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+    except Exception as e:
+        traceback.print_exc()
+        raise HTTPException(status_code=500, detail=str(e))
 
 
 @router.get("/{user_id}")
 def get_user(
     user_id: int,
-    db: Session = Depends(get_db),
+    user_service: UserService = Depends(get_user_service),
 ):
-    user_repository = UserRepository(db)
-    user = user_repository.get_by_id(user_id)
-
-    if user is None:
-        raise HTTPException(status_code=404, detail="User not found.")
-
-    return {
-        "id": user.id,
-        "username": user.username,
-        "created_at": user.created_at.isoformat(),
-    }
+    try:
+        return user_service.get_user(user_id)
+    except LookupError as e:
+        raise HTTPException(status_code=404, detail=str(e))
+    except Exception as e:
+        traceback.print_exc()
+        raise HTTPException(status_code=500, detail=str(e))
 
 
 @router.get("/")
 def get_users(
-    db: Session = Depends(get_db),
+    user_service: UserService = Depends(get_user_service),
 ):
-    user_repository = UserRepository(db)
-    users = user_repository.get_all()
-
-    return {
-        "users": [
-            {
-                "id": user.id,
-                "username": user.username,
-                "created_at": user.created_at.isoformat(),
-            }
-            for user in users
-        ]
-    }
+    try:
+        return user_service.get_users()
+    except Exception as e:
+        traceback.print_exc()
+        raise HTTPException(status_code=500, detail=str(e))

@@ -1,5 +1,3 @@
-from typing import Any
-
 from sqlalchemy.orm import Session
 
 from database.models import User
@@ -10,11 +8,14 @@ class UserRepository:
         self.db = db
 
     def get_by_id(self, user_id: int) -> User | None:
-        return (
+        print("Getting user by id")
+        user =  (
             self.db.query(User)
             .filter(User.id == user_id)
             .first()
         )
+        print("got user")
+        return user
 
     def get_by_username(self, username: str) -> User | None:
         return (
