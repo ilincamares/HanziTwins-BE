@@ -32,17 +32,6 @@ PROJECTION_MAPS: dict[str, list[dict]] = {}
 # -------------------------------------------------------------------
 
 def load_assets_into_memory() -> None:
-    """
-    Loads all static AI/application assets once at application startup.
-
-    After this function runs, the rest of the backend should access:
-    - CHAR_TO_PINYIN
-    - CONFUSION_MAPS
-    - PROJECTION_MAPS
-
-    instead of repeatedly reading files from disk.
-    """
-
     global ASSETS_LOADED
 
     if ASSETS_LOADED:
@@ -63,10 +52,6 @@ def load_assets_into_memory() -> None:
 
 
 def _load_char_to_pinyin_into_memory() -> None:
-    """
-    Loads the Excel metadata file once and builds CHAR_TO_PINYIN.
-    """
-
     if not EXCEL_PATH.exists():
         raise FileNotFoundError(f"Excel metadata file not found: {EXCEL_PATH}")
 
@@ -96,21 +81,6 @@ def _load_char_to_pinyin_into_memory() -> None:
 
 
 def _load_confusion_maps_into_memory() -> None:
-    """
-    Loads all confusion_map_*.json files into CONFUSION_MAPS.
-
-    Expected filenames:
-    - confusion_map_full.json
-    - confusion_map_hsk_1.json
-    - confusion_map_hsk_2.json
-    etc.
-
-    Stored keys:
-    - "all" for confusion_map_full.json
-    - "1" for confusion_map_hsk_1.json
-    - "2" for confusion_map_hsk_2.json
-    """
-
     if not CONFUSION_MAPS_DIR.exists():
         raise FileNotFoundError(f"Confusion maps directory not found: {CONFUSION_MAPS_DIR}")
 
@@ -141,14 +111,6 @@ def _confusion_map_key_from_filename(filename: str) -> str:
 
 
 def _load_projection_maps_into_memory() -> None:
-    """
-    Loads projection JSON files used by the explorer.
-
-    Expected filenames:
-    - embedding_projection_umap.json
-    - embedding_projection_tsne.json
-    """
-
     PROJECTION_MAPS.clear()
 
     projection_files = {
@@ -166,11 +128,6 @@ def _load_projection_maps_into_memory() -> None:
 
 
 def ensure_assets_loaded() -> None:
-    """
-    Safety helper. Allows services/tests to call utility methods even if
-    startup loading did not run for some reason.
-    """
-
     if not ASSETS_LOADED:
         load_assets_into_memory()
 
@@ -214,11 +171,6 @@ def get_projection_map(method: str) -> list[dict]:
 # -------------------------------------------------------------------
 
 def get_safe_pinyin(character: str) -> str:
-    """
-    Used when a fallback is acceptable.
-    If pinyin is missing, returns the character itself.
-    """
-
     value = get_char_to_pinyin_map().get(character)
 
     if value is None:
@@ -236,11 +188,6 @@ def get_safe_pinyin(character: str) -> str:
 
 
 def get_valid_pinyin(character: str) -> str | None:
-    """
-    Used when missing pinyin should be treated as invalid.
-    If pinyin is missing, returns None.
-    """
-
     value = get_char_to_pinyin_map().get(character)
 
     if value is None:
