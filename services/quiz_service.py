@@ -56,17 +56,17 @@ class QuizService:
                 start_idx = 4
 
             distractors_found = 0
-            for rh_char, score in neighbors_data[start_idx:]:
-                rh_pinyin = pinyin_map.get(rh_char, rh_char)
+            for neighbour_char, score in neighbors_data[start_idx:]:
+                neighbour_pinyin = pinyin_map.get(neighbour_char, neighbour_char)
 
-                if rh_pinyin not in seen_pinyins:
+                if neighbour_pinyin not in seen_pinyins:
                     options_rich.append({
-                        "character": rh_char,
-                        "pinyin": rh_pinyin,
+                        "character": neighbour_char,
+                        "pinyin": neighbour_pinyin,
                         "similarity": score,
                         "is_correct": False
                     })
-                    seen_pinyins.add(rh_pinyin)
+                    seen_pinyins.add(neighbour_pinyin)
                     distractors_found += 1
 
                 if distractors_found == 3:
