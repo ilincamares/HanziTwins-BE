@@ -1,7 +1,5 @@
-import os
 from contextlib import asynccontextmanager
 
-import torch
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from routes import routes_quiz, routes_user, routes_progress, routes_explorer
